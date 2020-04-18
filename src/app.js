@@ -11,7 +11,13 @@ app.use(cors());
 const repositories = [];
 
 app.get("/repositories", (request, response) => {
- return response.json(repositories);
+  const { id, title } = request.query;
+  const results = id
+    // ? repositories.filter( repository => (repository.id === i) || (repository.title.includes(title)))
+    ? repositories.filter( repository => repository.id === id)
+    : repositories;
+
+ return response.json(results);
 });
 
 app.post("/repositories", (request, response) => {
@@ -86,25 +92,39 @@ app.delete("/repositories/:id", (request, response) => {
 
 app.post("/repositories/:id/like", (request, response) => {
   
+  // const { id } = request.params;
+  // if (!isUuid(id)){
+  //   return response.status(400).json({error: "ID inexistente or wrong"});
+  // }
+
+  // const repositoryIndex = repositories.find( repository => repository.id === id );
+
+  // if (repositoryIndex < 0) {
+  //   return response.status(400).json({error: "ID inexistente"});
+  // } 
+
+  // const currentLikes = repositories[repositoryIndex].likes;
+  // const totalLikes = currentLikes + 1;
+  // repositories[repositoryIndex].likes = totalLikes;
+
+  // const repository = {
+  //   id: id,
+  //   likes: totalLikes
+  // }
+
+  // return response.json(repository);
+
   const { id } = request.params;
-  if (!isUuid(id)){
-    return response.status(400).json({error: "ID inexistente or wrong"});
+  if (!uuid(id)){
+    return response.status(400).json({error: "Invalid ID"});
   }
 
-  const repositoryIndex = repositories.findIndex( repository => repository.id === id );
-
-  if (repositoryIndex < 0) {
-    return response.status(400).json({error: "ID inexistente"});
-  } 
-
-  const currentLikes = repositories[repositoryIndex].likes;
-  const totalLikes = currentLikes + 1;
-  repositories[repositoryIndex].likes = totalLikes;
-
-  const repository = {
-    id: id,
-    likes: totalLikes
+  const repository = repositories.find(repository => repository.id === id);
+  if (!repository){
+    return response.status(400).json({error: "Repository not found"})
   }
+
+  repository.likes++;
 
   return response.json(repository);
 
